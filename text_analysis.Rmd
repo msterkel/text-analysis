@@ -50,7 +50,7 @@ write.csv(tweets, file="tweets.csv", row.names=FALSE)
 
 ```{r}
 
-setwd("C:/Users/mateo/Documents/Repo/text_analysis")
+setwd("C:/Users/mateo/Documents/Repo/text-analysis")
 
 tweets<-read.csv("tweets.csv")
 ```
