@@ -1,17 +1,19 @@
 ---
 title: "text analysis"
 author: "Matt Sterkel"
-date: "November 29, 2017"
 output: html_document
 ---
 
 ```{r, message=FALSE,warning=FALSE}
 library(twitteR)
-library(dplyr)
+library(graphics)
 library(purrr)
-library(stringr)
+library(stringr) 
 library(tm)
+library(syuzhet)
 ```
+
+
 
 ```{r}
 
@@ -23,7 +25,7 @@ setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
 ```
 
 
-
+Get tweets:
 
 ```{r}
 
@@ -46,7 +48,7 @@ write.csv(tweets, file="tweets.csv", row.names=FALSE)
 
 ```
 
-
+Read in data:
 
 ```{r}
 
@@ -55,6 +57,7 @@ setwd("C:/Users/mateo/Documents/Repo/text-analysis")
 tweets<-read.csv("tweets.csv")
 ```
 
+Clean up data:
 
 ```{r}
 twitterCorpus <-Corpus(VectorSource(tweets$text))
@@ -92,15 +95,63 @@ inspect(twitterCorpus[1:10])
 
 ```
 
+Sentiment analysis:
+
+```{r}
+
+#explain how dictionary sent is large( over 10,000), words are notstemed, they use plurals, past tense      #  adverbs, etc
+
+
+emotions<-get_nrc_sentiment(twitterCorpus$content)
+
+barplot(colSums(emotions),cex.names = .7,
+          col = rainbow(10),
+          main = "Sentiment scores for tweets"
+          )
+
+```
+
+
+
+
+```{r}
+
+
+get_sentiment(twitterCorpus$content[1:10])
+
+sent<-get_sentiment(twitterCorpus$content)
+  sentimentTweets<-dplyr::bind_cols(tweets,data.frame(sent))
+
+  # mean of sentiment positivity
+  
+  meanSent<-function(i,n){
+    mean(sentimentTweets$sent[i:n])
+  }
+  
+ (scores<-c(prat=meanSent(1,250),
+    oprah=meanSent(251,500),
+      neil=meanSent(501,750),
+        maher=meanSent(751,849),
+          astk=meanSent(850,1002)))
+          
+
+```
+
+
+
+
+
+
+Cluster analysis:
 
 ```{r}
 dtm<-DocumentTermMatrix(twitterCorpus)
+  dtm
 mat<-as.matrix(dtm)
 d<-dist(mat)
 groups<-hclust(d,method="ward.D")
 plot(groups,hang=-1)
 cut<-cutree(groups,k=5)
-plot(cut)
 newMat<-dplyr::bind_cols(tweets,data.frame(cut))
 
 table(newMat$screenName,newMat$cut)
