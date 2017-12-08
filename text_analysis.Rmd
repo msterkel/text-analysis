@@ -161,7 +161,7 @@ d<-dist(mat)
 groups<-hclust(d,method="ward.D")
 plot(groups,hang=-1)
 
-cut<-cutree(groups,k=18)
+cut<-cutree(groups,k=6)
 newMat<-dplyr::bind_cols(tweets,data.frame(cut))
 
 table(newMat$screenName,newMat$cut)
