@@ -13,7 +13,7 @@ library(tm)
 library(syuzhet)
 ```
 
-
+Connect to Twitter API:
 
 ```{r}
 
@@ -90,7 +90,7 @@ inspect(twitterCorpus[1:10])
  
 
 
-# stem corpus after sentiment, but before cluster analysis
+# stem corpus after sentiment analysis(given my sentiment dictionary choice), but before cluster analysis
 
 
 ```
@@ -98,9 +98,7 @@ inspect(twitterCorpus[1:10])
 Sentiment analysis:
 
 ```{r}
-
-#explain how dictionary sent is large( over 10,000), words are notstemed, they use plurals, past tense      #  adverbs, etc
-
+# find count of 8 emotional sentiments
 
 emotions<-get_nrc_sentiment(twitterCorpus$content)
 
@@ -115,7 +113,7 @@ barplot(colSums(emotions),cex.names = .7,
 
 
 ```{r}
-
+# sentiment positiviy rating
 
 get_sentiment(twitterCorpus$content[1:10])
 
@@ -145,13 +143,25 @@ sent<-get_sentiment(twitterCorpus$content)
 Cluster analysis:
 
 ```{r}
+# convert to stem words
+twitterCorpus<-tm_map(twitterCorpus,stemDocument)
+
+# build document term matrix
+
 dtm<-DocumentTermMatrix(twitterCorpus)
   dtm
 mat<-as.matrix(dtm)
+
+# create distance matrix
+
 d<-dist(mat)
+
+# input distance matrix into hclust function using method "ward.D"
+
 groups<-hclust(d,method="ward.D")
 plot(groups,hang=-1)
-cut<-cutree(groups,k=5)
+
+cut<-cutree(groups,k=18)
 newMat<-dplyr::bind_cols(tweets,data.frame(cut))
 
 table(newMat$screenName,newMat$cut)
